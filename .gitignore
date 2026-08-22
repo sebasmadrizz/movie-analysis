@@ -1,0 +1,28 @@
+# --- Python & General ---
+__pycache__/
+*.py[cod]
+*.class
+.venv/
+env/
+venv/
+.env
+
+# --- Node.js & Frontend ---
+node_modules/
+dist/
+build/
+.npm
+.eslintcache
+
+# --- OS & IDE ---
+.DS_Store
+.vscode/
+*.swp
+*.swo
+
+# --- Data & Local Databases ---
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+pgdata/
