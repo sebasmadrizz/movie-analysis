@@ -26,3 +26,5 @@ data/raw/*
 data/processed/*
 !data/processed/.gitkeep
 pgdata/
+# Sensitive environment files
+.env
