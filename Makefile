@@ -23,7 +23,7 @@ venv:
 
 # Run the database connectivity test script
 test-db:
-	$(BIN)/python pipeline/db_test.py
+	$(BIN)/python tests/db_test.py
 
 # Clean Python cache and virtual environment
 clean:
