@@ -29,3 +29,14 @@ test-db:
 clean:
 	rm -rf $(VENV)
 	find . -type d -name "__pycache__" -exec rm -rf {} +
+download-data:
+	.venv/bin/python pipeline/download_data.py
+load-data:
+	.venv/bin/python pipeline/extract_load.py
+
+# Verify that the data in PostgreSQL matches the CSVs
+test-ingestion:
+	.venv/bin/python tests/test_ingestion.py
+
+# execute all steps: download data, load data, and test ingestion
+ingest: download-data load-data test-ingestion
