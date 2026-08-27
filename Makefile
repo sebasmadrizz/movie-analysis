@@ -40,3 +40,9 @@ test-ingestion:
 
 # execute all steps: download data, load data, and test ingestion
 ingest: download-data load-data test-ingestion
+
+transform-data:
+	.venv/bin/python pipeline/transform.py
+
+test-transformation:
+	.venv/bin/pytest tests/test_transformation.py -v
