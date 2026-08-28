@@ -46,3 +46,12 @@ transform-data:
 
 test-transformation:
 	.venv/bin/pytest tests/test_transformation.py -v
+
+create-analytics-views:
+	.venv/bin/python pipeline/analytics.py
+
+
+test-analytics:
+	.venv/bin/pytest tests/test_analytics.py -v
+
+analytics-all: create-analytics-views test-analytics
