@@ -55,3 +55,12 @@ test-analytics:
 	.venv/bin/pytest tests/test_analytics.py -v
 
 analytics-all: create-analytics-views test-analytics
+
+
+create-feature-store:
+	.venv/bin/python pipeline/feature_store.py
+
+test-feature-store:
+	.venv/bin/pytest tests/test_feature_store.py -v
+
+ml-feature-store-all: create-feature-store test-feature-store

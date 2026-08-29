@@ -1,8 +1,3 @@
--- ============================================================================
--- SQL Script: 02_create_analytics_tables.sql
--- Description: Analytics schema DDL, JSON parsing transformation, and FK indexes
--- ============================================================================
-
 -- 1. CLEANUP PREVIOUS TABLES (IDEMPOTENCY)
 DROP TABLE IF EXISTS movie_crew CASCADE;
 DROP TABLE IF EXISTS movie_cast CASCADE;
