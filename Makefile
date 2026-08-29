@@ -64,3 +64,11 @@ test-feature-store:
 	.venv/bin/pytest tests/test_feature_store.py -v
 
 ml-feature-store-all: create-feature-store test-feature-store
+
+train-model:
+	.venv/bin/python pipeline/train_model.py
+
+test-train-model:
+	.venv/bin/pytest tests/test_train_model.py -v
+
+ml-train-all: train-model test-train-model
