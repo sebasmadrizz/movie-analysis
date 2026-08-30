@@ -1,6 +1,9 @@
 DROP VIEW IF EXISTS v_ml_movie_features CASCADE;
 CREATE OR REPLACE VIEW v_ml_movie_features AS
-WITH director_metrics AS (
+WITH global_avg_revenue AS (
+    SELECT AVG(revenue) AS avg_rev FROM dim_movies WHERE revenue > 10000
+),
+director_metrics AS (
     SELECT 
         mc.movie_id,
         p.name AS director_name,
@@ -99,9 +102,12 @@ SELECT
     COALESCE(ga.genre_list, 'Unknown') AS genres,
     COALESCE(dm.director_name, 'Unknown') AS director_name,
     COALESCE(dm.director_prior_movies_count, 0) AS director_prior_movies_count,
-    ROUND(COALESCE(dm.director_historical_avg_revenue, 0), 2) AS director_historical_avg_revenue,
-    ROUND(COALESCE(t3.top3_cast_historical_avg_revenue, 0), 2) AS top3_cast_historical_avg_revenue,
-    ROUND(COALESCE(sm.studio_historical_avg_revenue, 0), 2) AS studio_historical_avg_revenue,
+   ROUND(COALESCE(dm.director_historical_avg_revenue, (SELECT avg_rev FROM global_avg_revenue)), 2) AS director_historical_avg_revenue,
+ROUND(COALESCE(t3.top3_cast_historical_avg_revenue, (SELECT avg_rev FROM global_avg_revenue)), 2) AS top3_cast_historical_avg_revenue,
+ROUND(COALESCE(sm.studio_historical_avg_revenue, (SELECT avg_rev FROM global_avg_revenue)), 2) AS studio_historical_avg_revenue,
+CASE WHEN dm.director_historical_avg_revenue IS NULL THEN 1 ELSE 0 END AS director_is_debut,
+CASE WHEN t3.top3_cast_historical_avg_revenue IS NULL THEN 1 ELSE 0 END AS cast_is_debut,
+CASE WHEN sm.studio_historical_avg_revenue IS NULL THEN 1 ELSE 0 END AS studio_is_debut,
 COALESCE(sm.studio_prior_movies_count, 0) AS studio_prior_movies_count,
 COALESCE(sf.is_sequel, 0) AS is_sequel,
     
@@ -117,6 +123,6 @@ LEFT JOIN director_metrics dm ON m.movie_id = dm.movie_id
 LEFT JOIN top3_cast_agg t3 ON m.movie_id = t3.movie_id
 LEFT JOIN studio_metrics sm ON m.movie_id = sm.movie_id
 LEFT JOIN sequel_flag sf ON m.movie_id = sf.movie_id
-WHERE m.budget > 0 
-  AND m.revenue > 0 
+WHERE m.budget > 10000 
+  AND m.revenue > 10000 
   AND m.release_date IS NOT NULL;

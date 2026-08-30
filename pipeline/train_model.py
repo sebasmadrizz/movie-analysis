@@ -85,7 +85,8 @@ def train_revenue_model():
     "director_prior_movies_count", "director_historical_avg_revenue",
     "top3_cast_historical_avg_revenue",
     "studio_historical_avg_revenue", "studio_prior_movies_count",
-    "is_sequel"
+    "is_sequel",
+    "director_is_debut", "cast_is_debut", "studio_is_debut"
 ] + list(genre_dummies.columns)
     cat_features = ["original_language_code"]
     target_col = "target_log_revenue"

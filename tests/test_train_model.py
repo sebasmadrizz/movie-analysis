@@ -22,20 +22,23 @@ def test_model_artifact_exists_and_predicts():
     )
 
     sample_data = {
-        "budget_log": np.log1p(100_000_000),
-        "runtime": 120.0,
-        "release_year": 2024,
-        "release_month": 6,
-        "release_day_of_week": 5,
-        "genre_count": 2,
-        "director_prior_movies_count": 3,
-        "director_historical_avg_revenue": 150000000.0,
-        "top3_cast_historical_avg_revenue": 80000000.0,
-        "studio_historical_avg_revenue": 200000000.0,
-        "studio_prior_movies_count": 5,
-        "is_sequel": 0,
-        "original_language_code": "en",
-    }
+    "budget_log": np.log1p(100_000_000),
+    "runtime": 120.0,
+    "release_year": 2024,
+    "release_month": 6,
+    "release_day_of_week": 5,
+    "genre_count": 2,
+    "director_prior_movies_count": 3,
+    "director_historical_avg_revenue": 150000000.0,
+    "top3_cast_historical_avg_revenue": 80000000.0,
+    "studio_historical_avg_revenue": 200000000.0,
+    "studio_prior_movies_count": 5,
+    "is_sequel": 0,
+    "director_is_debut": 0,
+    "cast_is_debut": 0,
+    "studio_is_debut": 0,
+    "original_language_code": "en",
+}
 
     sample_input = pd.concat(
         [pd.DataFrame([sample_data]), genre_dummies],
