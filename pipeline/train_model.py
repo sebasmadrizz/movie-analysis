@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import logging
 from pathlib import Path
 import joblib
@@ -8,9 +9,9 @@ from dotenv import load_dotenv
 
 from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.preprocessing import OneHotEncoder, StandardScaler, MultiLabelBinarizer
 from sklearn.pipeline import Pipeline
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.metrics import root_mean_squared_error, mean_absolute_error, r2_score
 
 logging.basicConfig(
@@ -42,6 +43,24 @@ def load_feature_data() -> pd.DataFrame:
     conn.close()
     return df
 
+def build_genre_dummies(df: pd.DataFrame) -> tuple[pd.DataFrame, MultiLabelBinarizer]:
+    """Converts the 'genres' column (string 'Action, Adventure') into multi-label dummies.
+
+    Returns both the dummy DataFrame and the fitted MultiLabelBinarizer,
+    so the binarizer can be persisted alongside the model for future inference.
+    """
+    genre_lists = df["genres"].apply(
+        lambda x: [g.strip() for g in x.split(",")] if x != "Unknown" else []
+    )
+    mlb = MultiLabelBinarizer()
+    genre_dummies = pd.DataFrame(
+        mlb.fit_transform(genre_lists),
+        columns=[f"genre_{g}" for g in mlb.classes_],
+        index=df.index
+    )
+    return genre_dummies, mlb
+
+
 def train_revenue_model():
     """Preprocesses features, trains a Random Forest model,
 
@@ -55,12 +74,19 @@ def train_revenue_model():
 
     logger.info(f"Loaded {len(df)} records for training.")
 
+    df["budget_log"] = np.log1p(df["budget"])
+
+    genre_dummies, mlb = build_genre_dummies(df)
+    df = pd.concat([df, genre_dummies], axis=1)
+
     num_features = [
-        "budget", "runtime", "release_year", "release_month",
-        "release_day_of_week", "genre_count",
-        "director_prior_movies_count", "director_historical_avg_revenue",
-        "top3_cast_historical_avg_revenue"
-    ]
+    "budget_log", "runtime", "release_year", "release_month",
+    "release_day_of_week", "genre_count",
+    "director_prior_movies_count", "director_historical_avg_revenue",
+    "top3_cast_historical_avg_revenue",
+    "studio_historical_avg_revenue", "studio_prior_movies_count",
+    "is_sequel"
+] + list(genre_dummies.columns)
     cat_features = ["original_language_code"]
     target_col = "target_log_revenue"
 
@@ -80,10 +106,15 @@ def train_revenue_model():
 
     model_pipeline = Pipeline([
         ("preprocessor", preprocessor),
-        ("regressor", RandomForestRegressor(n_estimators=100, random_state=42, n_jobs=-1))
+        ("regressor", HistGradientBoostingRegressor(
+    max_iter=300,
+    learning_rate=0.05,
+    max_depth=6,
+    random_state=42
+))
     ])
 
-    logger.info("Training Random Forest Regressor pipeline...")
+    logger.info("Training HistGradientBoostingRegressor pipeline...")
     model_pipeline.fit(X_train, y_train)
 
     predictions = model_pipeline.predict(X_test)
@@ -100,7 +131,7 @@ def train_revenue_model():
     models_dir.mkdir(exist_ok=True)
     model_path = models_dir / "revenue_model.joblib"
 
-    joblib.dump(model_pipeline, model_path)
+    joblib.dump({"model": model_pipeline, "mlb": mlb}, model_path)
     logger.info(f"Model artifact successfully saved to: {model_path}")
 
     return model_pipeline, {"rmse": rmse, "mae": mae, "r2": r2}

@@ -1,4 +1,4 @@
-
+DROP VIEW IF EXISTS v_ml_movie_features CASCADE;
 CREATE OR REPLACE VIEW v_ml_movie_features AS
 WITH director_metrics AS (
     SELECT 
@@ -40,6 +40,37 @@ top3_cast_agg AS (
     FROM top3_cast_metrics
     GROUP BY movie_id
 ),
+
+movie_primary_studio AS (
+    SELECT DISTINCT ON (mpc.movie_id)
+        mpc.movie_id,
+        mpc.company_id
+    FROM movie_production_companies mpc
+    ORDER BY mpc.movie_id, mpc.company_id
+),
+studio_metrics AS (
+    SELECT 
+        mps.movie_id,
+        AVG(m_past.revenue) OVER (
+            PARTITION BY mps.company_id 
+            ORDER BY m_past.release_date 
+            ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
+        ) AS studio_historical_avg_revenue,
+        COUNT(m_past.movie_id) OVER (
+            PARTITION BY mps.company_id 
+            ORDER BY m_past.release_date 
+            ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
+        ) AS studio_prior_movies_count
+    FROM movie_primary_studio mps
+    JOIN dim_movies m_past ON mps.movie_id = m_past.movie_id
+    WHERE m_past.revenue > 0
+),
+sequel_flag AS (
+    SELECT DISTINCT mk.movie_id, 1 AS is_sequel
+    FROM movie_keywords mk
+    JOIN dim_keywords k ON mk.keyword_id = k.keyword_id
+    WHERE k.keyword_name = 'sequel'
+),
 movie_genres_agg AS (
     SELECT 
         mg.movie_id,
@@ -70,6 +101,9 @@ SELECT
     COALESCE(dm.director_prior_movies_count, 0) AS director_prior_movies_count,
     ROUND(COALESCE(dm.director_historical_avg_revenue, 0), 2) AS director_historical_avg_revenue,
     ROUND(COALESCE(t3.top3_cast_historical_avg_revenue, 0), 2) AS top3_cast_historical_avg_revenue,
+    ROUND(COALESCE(sm.studio_historical_avg_revenue, 0), 2) AS studio_historical_avg_revenue,
+COALESCE(sm.studio_prior_movies_count, 0) AS studio_prior_movies_count,
+COALESCE(sf.is_sequel, 0) AS is_sequel,
     
     -- TARGET VARIABLES (OBJECTIVES TO PREDICT)
     m.revenue AS target_revenue,
@@ -81,6 +115,8 @@ FROM dim_movies m
 LEFT JOIN movie_genres_agg ga ON m.movie_id = ga.movie_id
 LEFT JOIN director_metrics dm ON m.movie_id = dm.movie_id
 LEFT JOIN top3_cast_agg t3 ON m.movie_id = t3.movie_id
+LEFT JOIN studio_metrics sm ON m.movie_id = sm.movie_id
+LEFT JOIN sequel_flag sf ON m.movie_id = sf.movie_id
 WHERE m.budget > 0 
   AND m.revenue > 0 
   AND m.release_date IS NOT NULL;
