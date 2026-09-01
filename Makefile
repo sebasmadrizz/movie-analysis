@@ -72,3 +72,7 @@ test-train-model:
 	.venv/bin/pytest tests/test_train_model.py -v
 
 ml-train-all: train-model test-train-model
+
+
+analyze-importance:
+	.venv/bin/python pipeline/analyze_importance.py

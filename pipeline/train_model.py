@@ -1,4 +1,5 @@
 import os
+from re import search
 import numpy as np
 import logging
 from pathlib import Path
@@ -7,7 +8,7 @@ import pandas as pd
 import psycopg2
 from dotenv import load_dotenv
 
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, MultiLabelBinarizer
 from sklearn.pipeline import Pipeline
@@ -105,18 +106,35 @@ def train_revenue_model():
         ]
     )
 
-    model_pipeline = Pipeline([
-        ("preprocessor", preprocessor),
-        ("regressor", HistGradientBoostingRegressor(
-    max_iter=300,
-    learning_rate=0.05,
-    max_depth=6,
-    random_state=42
-))
+    base_pipeline = Pipeline([
+    ("preprocessor", preprocessor),
+    ("regressor", HistGradientBoostingRegressor(random_state=42))
     ])
 
-    logger.info("Training HistGradientBoostingRegressor pipeline...")
-    model_pipeline.fit(X_train, y_train)
+    param_dist = {
+    "regressor__max_iter": [200, 300, 500],
+    "regressor__learning_rate": [0.01, 0.03, 0.05, 0.1],
+    "regressor__max_depth": [4, 6, 8, None],
+    "regressor__min_samples_leaf": [10, 20, 30],
+    "regressor__l2_regularization": [0, 0.1, 1.0],
+    }
+
+    logger.info("Running RandomizedSearchCV for hyperparameter tuning...")
+    search = RandomizedSearchCV(
+    base_pipeline,
+    param_distributions=param_dist,
+    n_iter=30,
+    cv=5,
+    scoring="r2",
+    random_state=42,
+    n_jobs=-1,
+)
+    search.fit(X_train, y_train)
+
+    logger.info(f"Best hyperparameters found: {search.best_params_}")
+    logger.info(f"Best cross-validated R^2: {search.best_score_:.4f}")
+
+    model_pipeline = search.best_estimator_
 
     predictions = model_pipeline.predict(X_test)
     rmse = root_mean_squared_error(y_test, predictions)
