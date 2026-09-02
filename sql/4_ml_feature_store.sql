@@ -3,6 +3,9 @@ CREATE OR REPLACE VIEW v_ml_movie_features AS
 WITH global_avg_revenue AS (
     SELECT AVG(revenue) AS avg_rev FROM dim_movies WHERE revenue > 10000
 ),
+global_avg_budget AS (
+    SELECT AVG(budget) AS avg_bud FROM dim_movies WHERE budget > 10000
+),
 director_metrics AS (
     SELECT 
         mc.movie_id,
@@ -67,6 +70,26 @@ studio_metrics AS (
     FROM movie_primary_studio mps
     JOIN dim_movies m_past ON mps.movie_id = m_past.movie_id
     WHERE m_past.revenue > 0
+
+    ),
+    genre_historical_budget AS (
+    SELECT 
+        mg.movie_id,
+        AVG(m_past.budget) OVER (
+            PARTITION BY mg.genre_id 
+            ORDER BY m_past.release_date, m_past.movie_id
+            ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
+        ) AS genre_past_avg_budget
+    FROM movie_genres mg
+    JOIN dim_movies m_past ON mg.movie_id = m_past.movie_id
+    WHERE m_past.budget > 10000
+),
+genre_historical_budget_agg AS (
+    SELECT 
+        movie_id,
+        AVG(genre_past_avg_budget) AS avg_genre_historical_budget
+    FROM genre_historical_budget
+    GROUP BY movie_id
 ),
 sequel_flag AS (
     SELECT DISTINCT mk.movie_id, 1 AS is_sequel
@@ -91,6 +114,12 @@ SELECT
     m.budget,
     m.runtime,
     COALESCE(m.original_language_code, 'en') AS original_language_code,
+
+    ROUND((m.budget / NULLIF(m.runtime, 0))::NUMERIC, 2) AS budget_per_minute,
+    ROUND(
+        (m.budget / COALESCE(gba.avg_genre_historical_budget, (SELECT avg_bud FROM global_avg_budget)))::NUMERIC, 
+        4
+    ) AS budget_vs_genre_historical_ratio,
     
     -- SEASONALITY
     EXTRACT(YEAR FROM m.release_date)::INT AS release_year,
@@ -122,6 +151,7 @@ LEFT JOIN movie_genres_agg ga ON m.movie_id = ga.movie_id
 LEFT JOIN director_metrics dm ON m.movie_id = dm.movie_id
 LEFT JOIN top3_cast_agg t3 ON m.movie_id = t3.movie_id
 LEFT JOIN studio_metrics sm ON m.movie_id = sm.movie_id
+LEFT JOIN genre_historical_budget_agg gba ON m.movie_id = gba.movie_id
 LEFT JOIN sequel_flag sf ON m.movie_id = sf.movie_id
 WHERE m.budget > 10000 
   AND m.revenue > 10000 

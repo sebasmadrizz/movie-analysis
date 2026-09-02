@@ -17,14 +17,14 @@ def analyze_feature_importance():
     df = pd.concat([df, genre_dummies], axis=1)
 
     num_features = [
-        "budget_log", "runtime", "release_year", "release_month",
-        "release_day_of_week", "genre_count",
-        "director_prior_movies_count", "director_historical_avg_revenue",
-        "top3_cast_historical_avg_revenue",
-        "studio_historical_avg_revenue", "studio_prior_movies_count",
-        "is_sequel",
-        "director_is_debut", "cast_is_debut", "studio_is_debut"
-    ] + list(genre_dummies.columns)
+            "budget_log", "runtime", "release_year", "release_month",
+            "release_day_of_week", "genre_count",
+            "director_prior_movies_count", "director_historical_avg_revenue",
+            "top3_cast_historical_avg_revenue",
+            "studio_historical_avg_revenue", "studio_prior_movies_count",
+            "is_sequel", "director_is_debut", "cast_is_debut", "studio_is_debut",
+            "budget_per_minute", "budget_vs_genre_historical_ratio" # <-- ¡Agregadas!
+        ] + list(genre_dummies.columns)
     cat_features = ["original_language_code"]
 
     X = df[num_features + cat_features]
