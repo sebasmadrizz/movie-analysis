@@ -76,3 +76,6 @@ ml-train-all: train-model test-train-model
 
 analyze-importance:
 	.venv/bin/python pipeline/analyze_importance.py
+
+run-api:
+	cd backend && ../.venv/bin/uvicorn app.main:app --reload
