@@ -9,3 +9,12 @@ class MovieProfitOut(BaseModel):
     revenue: float
     net_profit: float
     roi: float | None
+
+class GenrePerformanceOut(BaseModel):
+    genre_name: str
+    total_movies: int
+    total_budget: float
+    total_revenue: float
+    total_profit: float
+    avg_roi: float | None
+    

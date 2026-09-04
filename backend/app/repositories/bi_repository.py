@@ -15,3 +15,10 @@ class BIRepository(BaseRepository):
             "SELECT * FROM v_top_profitable_movies LIMIT :limit",
             {"limit": limit},
         )
+
+
+    def v_genre_performance(self, limit: int = 10) -> list[dict]:
+            return self.fetch_all(
+                "SELECT * FROM v_genre_performance LIMIT :limit",
+                {"limit": limit},
+            )
