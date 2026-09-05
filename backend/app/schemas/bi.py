@@ -17,4 +17,10 @@ class GenrePerformanceOut(BaseModel):
     total_revenue: float
     total_profit: float
     avg_roi: float | None
-    
+
+class TopDirectorOut(BaseModel):
+    person_id: int
+    director_name: str
+    total_movies_directed: int
+    total_box_office: float
+    total_profit: float

@@ -9,3 +9,9 @@ class BIService:
 
     def get_genre_performance(self, limit: int) -> list[dict]:
             return self.repo.v_genre_performance(limit)
+
+    def get_top_roi_movies(self, limit: int) -> list[dict]:
+                return self.repo.v_top_roi_movies(limit)
+
+    def get_top_directors(self, limit: int) -> list[dict]:
+                return self.repo.v_top_directors(limit)

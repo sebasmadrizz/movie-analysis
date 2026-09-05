@@ -22,3 +22,16 @@ class BIRepository(BaseRepository):
                 "SELECT * FROM v_genre_performance LIMIT :limit",
                 {"limit": limit},
             )
+
+
+    def v_top_roi_movies(self, limit: int = 10) -> list[dict]:
+            return self.fetch_all(
+                "SELECT * FROM v_top_roi_movies LIMIT :limit",
+                {"limit": limit},
+            )
+
+    def v_top_directors(self, limit: int = 10) -> list[dict]:
+            return self.fetch_all(
+                "SELECT * FROM v_top_directors LIMIT :limit",
+                {"limit": limit},
+            )
