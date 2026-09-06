@@ -35,3 +35,15 @@ class BIRepository(BaseRepository):
                 "SELECT * FROM v_top_directors LIMIT :limit",
                 {"limit": limit},
             )
+
+    def v_top_lead_actors(self, limit: int = 10) -> list[dict]:
+                return self.fetch_all(
+                    "SELECT * FROM v_top_lead_actors LIMIT :limit",
+                    {"limit": limit},
+                )
+
+    def v_top_director_actor_duos(self, limit: int = 10) -> list[dict]:
+                return self.fetch_all(
+                    "SELECT * FROM v_top_director_actor_duos LIMIT :limit",
+                    {"limit": limit},
+                )

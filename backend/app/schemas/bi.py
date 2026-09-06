@@ -24,3 +24,19 @@ class TopDirectorOut(BaseModel):
     total_movies_directed: int
     total_box_office: float
     total_profit: float
+
+
+class TopLeadActorOut(BaseModel):
+    person_id: int
+    actor_name: str
+    lead_roles_count: int
+    total_box_office: float
+    avg_box_office_per_movie: float
+
+
+class DirectorActorDuoOut(BaseModel):
+    director_name: str
+    actor_name: str
+    collaborations: int
+    total_box_office: float
+    avg_roi: float | None

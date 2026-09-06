@@ -15,3 +15,9 @@ class BIService:
 
     def get_top_directors(self, limit: int) -> list[dict]:
                 return self.repo.v_top_directors(limit)
+
+    def get_top_lead_actors(self, limit: int) -> list[dict]:
+                    return self.repo.v_top_lead_actors(limit)
+
+    def get_top_director_actor_duos(self, limit: int) -> list[dict]:
+                    return self.repo.v_top_director_actor_duos(limit)
