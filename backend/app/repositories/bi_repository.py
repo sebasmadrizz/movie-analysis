@@ -47,3 +47,33 @@ class BIRepository(BaseRepository):
                     "SELECT * FROM v_top_director_actor_duos LIMIT :limit",
                     {"limit": limit},
                 )
+
+    def v_production_company_performance(self, limit: int = 10) -> list[dict]:
+                    return self.fetch_all(
+                        "SELECT * FROM v_production_company_performance LIMIT :limit",
+                        {"limit": limit},
+                    )
+
+    def v_critical_vs_commercial_matrix(self, limit: int = 10) -> list[dict]:
+                        return self.fetch_all(
+                            "SELECT * FROM v_critical_vs_commercial_matrix LIMIT :limit",
+                            {"limit": limit},
+                        )
+
+    def v_top_financial_flops(self, limit: int = 10) -> list[dict]:
+                            return self.fetch_all(
+                                "SELECT * FROM v_top_financial_flops LIMIT :limit",
+                                {"limit": limit},
+                            )
+
+    def v_worst_performing_directors(self, limit: int = 10) -> list[dict]:
+                                return self.fetch_all(
+                                    "SELECT * FROM v_worst_performing_directors LIMIT :limit",
+                                    {"limit": limit},
+                                )
+
+    def v_lowest_roi_lead_actors(self, limit: int = 10) -> list[dict]:
+                                    return self.fetch_all(
+                                        "SELECT * FROM v_lowest_roi_lead_actors LIMIT :limit",
+                                        {"limit": limit},
+                                    )
