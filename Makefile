@@ -79,3 +79,8 @@ analyze-importance:
 
 run-api:
 	cd backend && ../.venv/bin/uvicorn app.main:app --reload
+
+
+test-bi:
+	PYTHONPATH=backend $(VENV)/bin/pytest tests/test_endpoints_bi.py -v
+
