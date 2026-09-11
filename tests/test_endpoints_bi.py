@@ -40,10 +40,24 @@ class MockBIService:
         }]
 
     def get_top_directors(self, limit: int):
-        return [{"person_id": 10, "name": "Christopher Nolan", "avg_revenue": 450000000.00}]
+        return [{
+            "person_id": 10,
+            "director_name": "Christopher Nolan",
+            "total_movies_directed": 10,
+            "total_box_office": 5000000000.0,
+            "total_profit": 3000000000.0,
+            "avg_revenue": 500000000.0
+        }]
 
     def get_top_lead_actors(self, limit: int):
-        return [{"person_id": 20, "name": "Tom Cruise", "avg_revenue": 500000000.00}]
+        return [{
+            "person_id": 20,
+            "actor_name": "Tom Cruise",
+            "lead_roles_count": 15,
+            "total_box_office": 7000000000.0,
+            "avg_box_office_per_movie": 466666666.67,
+            "avg_revenue": 500000000.0
+        }]
 
     def get_top_director_actor_duos(self, limit: int):
         return [{"director_name": "Director X", "actor_name": "Actor Y", "collaboration_count": 3}]
@@ -97,3 +111,19 @@ def test_top_financial_flops():
     data = response.json()
     assert isinstance(data, list)
     assert data[0]["net_loss"] == -50000000.0
+
+
+def test_top_directors():
+    response = client.get("/api/v1/bi/top-directors?limit=1")
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    assert data[0]["director_name"] == "Christopher Nolan"
+
+
+def test_top_lead_actors():
+    response = client.get("/api/v1/bi/top-lead-actors?limit=1")
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    assert data[0]["actor_name"] == "Tom Cruise"
