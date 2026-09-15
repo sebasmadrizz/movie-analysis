@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 import numpy as np
 from app.ml.predictor import RevenuePredictor
 from app.repositories.ml_repository import MLRepository
@@ -9,9 +10,21 @@ class MLService:
         self.repo = repo
 
     def predict_revenue(self, request: RevenuePredictionRequest) -> float:
+        if not self.repo.person_exists(request.director_id):
+            raise HTTPException(status_code=404, detail=f"Director with id {request.director_id} not found")
+
+        for cast_id in request.cast_ids:
+            if not self.repo.person_exists(cast_id):
+                raise HTTPException(status_code=404, detail=f"Cast member with id {cast_id} not found")
+
+        if not self.repo.company_exists(request.studio_id):
+            raise HTTPException(status_code=404, detail=f"Studio with id {request.studio_id} not found")
+
         director_metrics = self.repo.get_director_metrics(request.director_id, request.release_date)
         cast_metrics = self.repo.get_cast_metrics(request.cast_ids, request.release_date)
         studio_metrics = self.repo.get_studio_metrics(request.studio_id, request.release_date)
+
+    
 
         features = {
             "budget_log": np.log1p(request.budget),

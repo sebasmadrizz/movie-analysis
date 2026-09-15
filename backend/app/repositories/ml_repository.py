@@ -2,6 +2,7 @@ from datetime import date
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+
 class MLRepository:
     def __init__(self, db: Session):
         self.db = db
@@ -26,3 +27,17 @@ class MLRepository:
             {"company_id": company_id, "target_date": target_date},
         )
         return dict(result.mappings().one())
+
+    def person_exists(self, person_id: int) -> bool:
+        result = self.db.execute(
+            text("SELECT 1 FROM dim_people WHERE person_id = :person_id"),
+            {"person_id": person_id},
+        )
+        return result.first() is not None
+
+    def company_exists(self, company_id: int) -> bool:
+        result = self.db.execute(
+            text("SELECT 1 FROM dim_companies WHERE company_id = :company_id"),
+            {"company_id": company_id},
+        )
+        return result.first() is not None
