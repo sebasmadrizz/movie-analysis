@@ -84,3 +84,6 @@ run-api:
 test-bi:
 	PYTHONPATH=backend $(VENV)/bin/pytest tests/test_endpoints_bi.py -v
 
+test-ml:
+	PYTHONPATH=backend $(VENV)/bin/pytest tests/test_ml_api.py -v
+
