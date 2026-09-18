@@ -90,3 +90,78 @@ has one clear reason to change. Other SOLID principles are applied
 unevenly for now (e.g. `MLRepository` doesn't yet share a common
 interface with `BIRepository`) — a known area for improvement as
 the project evolves.
+
+## How to Run It
+
+### Prerequisites
+- Python 3.11+
+- Docker (for PostgreSQL)
+- A Kaggle account with an API token (used to download the dataset)
+
+### Setup
+
+1. Clone the repo and create the environment:
+```bash
+   git clone https://github.com/sebasmadrizz/movie-analysis.git
+   cd movie_analysis
+   make venv
+```
+
+2. Create a `.env` file in the project root:
+
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=your_password
+POSTGRES_DB=moviedb
+KAGGLE_API_TOKEN=your_kaggle_token
+
+
+3. Start PostgreSQL:
+```bash
+   make db-up
+```
+
+### Run the pipeline
+
+Each stage has its own command and test, and most are chained into a
+single target so tests run right after their step:
+
+```bash
+make ingest                 # download + load raw data, then verify it
+make transform-data         # build the analytics schema
+make test-transformation
+
+make analytics-all          # create BI views + run their tests
+make ml-feature-store-all   # create the ML feature store view + tests
+make train-model            # train the revenue model
+make test-train-model
+```
+
+`models/revenue_model.joblib` is already committed to the repo, but
+running `make train-model` regenerates it from scratch — recommended
+so you see the full pipeline work end-to-end rather than relying on
+a pre-baked artifact.
+
+`make analyze-importance` is optional — it's an exploratory script
+for inspecting feature importance, not required for the pipeline to
+work.
+
+### Run the API
+
+```bash
+make run-api
+```
+
+Then open `http://127.0.0.1:8000/docs` for interactive API docs.
+
+Run the API's own test suites independently at any point:
+```bash
+make test-bi
+make test-ml
+```
+
+### Stopping everything
+
+```bash
+make db-down     # stop and remove the database container
+make clean        # remove .venv and Python cache files
+```
