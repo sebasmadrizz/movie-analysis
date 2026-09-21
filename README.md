@@ -165,3 +165,68 @@ make test-ml
 make db-down     # stop and remove the database container
 make clean        # remove .venv and Python cache files
 ```
+
+## API Endpoints
+ 
+Full interactive documentation (with request/response schemas and a
+"try it out" button) is available at `/docs` once the API is
+running. Below is a summary.
+ 
+### BI Endpoints (`/api/v1/bi`)
+ 
+All BI endpoints are `GET` requests that query a pre-aggregated SQL
+view, with an optional `limit` query parameter (default: 10).
+ 
+| Endpoint | Returns |
+|---|---|
+| `/top-profitable-movies` | Movies ranked by net profit (revenue - budget) |
+| `/top-roi-movies` | Movies ranked by return on investment |
+| `/genre-performance` | Aggregated budget, revenue, and ROI by genre |
+| `/top-directors` | Directors ranked by total box office |
+| `/top-lead-actors` | Lead actors (top 3 billing) ranked by box office |
+| `/director-actor-duos` | Director/actor pairs with 2+ collaborations, ranked by box office |
+| `/production-company-performance` | Studios ranked by revenue, with market share |
+| `/critical-vs-commercial-matrix` | Movies classified by critical rating vs. commercial performance |
+| `/top-financial-flops` | Movies with the largest real financial losses |
+| `/worst-performing-directors` | Directors ranked by lowest average ROI |
+| `/lowest-roi-lead-actors` | Lead actors ranked by lowest average ROI |
+ 
+Example:
+```bash
+curl "http://127.0.0.1:8000/api/v1/bi/top-profitable-movies?limit=5"
+```
+ 
+### ML Endpoint (`/api/v1/ml`)
+ 
+`POST /predict-revenue` — predicts a movie's revenue given its
+budget, genres, release date, and the IDs of its director, top-3
+cast, and production studio. Historical performance for those
+IDs (prior movies, average revenue, debut status) is resolved
+automatically from the database — not supplied by the caller.
+ 
+Example request:
+```json
+{
+  "budget": 100000000,
+  "runtime": 120,
+  "genres": ["Action", "Adventure"],
+  "release_date": "2024-06-15",
+  "director_id": 488,
+  "cast_ids": [380, 62, 2231],
+  "studio_id": 6194,
+  "is_sequel": 0,
+  "original_language_code": "en",
+  "budget_vs_genre_historical_ratio": 1.2
+}
+```
+ 
+Example response:
+```json
+{
+  "predicted_revenue": 281279437.07
+}
+```
+ 
+Returns `404` if `director_id`, any `cast_ids`, or `studio_id` do not
+exist in the database.
+ 
