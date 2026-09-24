@@ -15,9 +15,11 @@ function formatStatValue(val) {
 function computeStats(data) {
   if (!data || data.length === 0) return [];
  
+
   const numericKeys = Object.keys(data[0]).filter(
     (key) => typeof data[0][key] === 'number'
   );
+  
  
   // Pick up to 3 numeric columns to summarize (skip ids)
   const relevantKeys = numericKeys.filter((k) => !k.toLowerCase().includes('_id')).slice(0, 3);
@@ -32,11 +34,13 @@ function computeStats(data) {
     };
   });
 }
- 
+ const LIMIT_OPTIONS = [5, 10, 25, 50];
 export default function BiDashboard() {
   const [activeKey, setActiveKey] = useState(biReports[0].key);
+  const [limit, setLimit] = useState(10);
   const activeReport = biReports.find((r) => r.key === activeKey);
-  const { data, loading, error } = useBiData(activeReport.endpoint);
+  const endpointWithLimit = `${activeReport.endpoint}?limit=${limit}`;
+  const { data, loading, error } = useBiData(endpointWithLimit);
  
   const stats = useMemo(() => computeStats(data), [data]);
  
@@ -54,6 +58,26 @@ export default function BiDashboard() {
             Business intelligence data pulled directly from a pre-aggregated SQL view.
           </p>
         </div>
+        {/* Limit Filter */}
+        <div className="flex items-center gap-2">
+          <label htmlFor="limit-select" className="text-sm text-gray-500">
+            Show
+          </label>
+          <select
+            id="limit-select"
+            value={limit}
+            onChange={(e) => setLimit(Number(e.target.value))}
+            className="border border-gray-300 rounded-md text-sm px-3 py-1.5 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+          >
+            {LIMIT_OPTIONS.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt} rows
+              </option>
+            ))}
+          </select>
+        </div>
+
+
  
         {/* Connection Error */}
         {error && (
