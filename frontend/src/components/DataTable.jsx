@@ -1,3 +1,4 @@
+import { useState } from 'react';
 function formatValue(key, val) {
   if (val === null || val === undefined) return '—';
  
@@ -35,7 +36,24 @@ function getValueColor(key, val) {
   return '';
 }
  
-export default function DataTable({ data }) {
+export default function DataTable({ data, sortKey, sortDirection, setSortKey, setSortDirection }) {
+const sortedData = sortKey
+  ? [...data].sort((a, b) => {
+      const valA = a[sortKey];
+      const valB = b[sortKey];
+      if (valA === valB) return 0;
+      const comparison = valA > valB ? 1 : -1;
+      return sortDirection === 'asc' ? comparison : -comparison;
+    })
+  : data;
+  const handleSort = (key) => {
+  if (sortKey === key) {
+    setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+  } else {
+    setSortKey(key);
+    setSortDirection('asc');
+  }
+};
   if (!data || data.length === 0) {
     return (
       <div className="p-8 text-center text-gray-500 text-sm">
@@ -43,21 +61,27 @@ export default function DataTable({ data }) {
       </div>
     );
   }
- 
+
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm text-gray-600">
         <thead className="bg-slate-100 text-slate-700 uppercase text-xs tracking-wider">
           <tr>
             {Object.keys(data[0]).map((key) => (
-              <th key={key} className="px-6 py-3 font-semibold">
+              <th
+                key={key}
+                onClick={() => handleSort(key)}
+                className="px-6 py-3 font-semibold cursor-pointer select-none hover:text-slate-900"
+              >
                 {key.replace(/_/g, ' ')}
+                {sortKey === key && (sortDirection === 'asc' ? ' ▲' : ' ▼')}
               </th>
             ))}
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
-          {data.map((row, index) => (
+          {sortedData.map((row, index) => (
             <tr key={index} className="hover:bg-gray-50/80 transition-colors">
               {Object.entries(row).map(([key, val]) => (
                 <td

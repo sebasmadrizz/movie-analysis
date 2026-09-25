@@ -38,6 +38,16 @@ function computeStats(data) {
 export default function BiDashboard() {
   const [activeKey, setActiveKey] = useState(biReports[0].key);
   const [limit, setLimit] = useState(10);
+  
+  const [sortKey, setSortKey] = useState(null);
+  const [sortDirection, setSortDirection] = useState('asc');
+
+  const handleSelectReport = (key) => {
+    setActiveKey(key);
+    setSortKey(null);
+    setSortDirection('asc');
+  };
+
   const activeReport = biReports.find((r) => r.key === activeKey);
   const endpointWithLimit = `${activeReport.endpoint}?limit=${limit}`;
   const { data, loading, error } = useBiData(endpointWithLimit);
@@ -46,7 +56,7 @@ export default function BiDashboard() {
  
   return (
     <div className="flex -mx-4 sm:-mx-6 lg:-mx-8 -my-8 min-h-[calc(100vh-8.5rem)]">
-      <Sidebar activeKey={activeKey} onSelect={setActiveKey} />
+      <Sidebar activeKey={activeKey} onSelect={handleSelectReport} />
  
       <div className="flex-1 px-6 py-8 space-y-6 overflow-x-hidden">
         {/* Header */}
@@ -126,7 +136,13 @@ export default function BiDashboard() {
                 Total records: {data.length}
               </span>
             </div>
-            <DataTable data={data} />
+            <DataTable 
+    data={data} 
+    sortKey={sortKey} 
+    sortDirection={sortDirection} 
+    setSortKey={setSortKey} 
+    setSortDirection={setSortDirection} 
+  />
           </div>
         )}
       </div>
