@@ -9,7 +9,7 @@ class MLService:
         self.predictor = predictor
         self.repo = repo
 
-    def predict_revenue(self, request: RevenuePredictionRequest) -> float:
+    def predict_revenue(self, request: RevenuePredictionRequest) -> dict:
         if not self.repo.person_exists(request.director_id):
             raise HTTPException(status_code=404, detail=f"Director with id {request.director_id} not found")
 
@@ -46,4 +46,11 @@ class MLService:
             "studio_is_debut": studio_metrics["studio_is_debut"],
             "original_language_code": request.original_language_code,
         }
-        return self.predictor.predict(features, request.genres)
+        predicted_revenue = self.predictor.predict(features, request.genres)
+
+        return {
+            "predicted_revenue": predicted_revenue,
+            "director_is_debut": bool(director_metrics["director_is_debut"]),
+            "cast_is_debut": bool(cast_metrics["cast_is_debut"]),
+            "studio_is_debut": bool(studio_metrics["studio_is_debut"]),
+        }

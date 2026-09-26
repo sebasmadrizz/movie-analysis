@@ -15,3 +15,6 @@ class RevenuePredictionRequest(BaseModel):
 
 class RevenuePredictionResponse(BaseModel):
     predicted_revenue: float
+    director_is_debut: bool
+    cast_is_debut: bool
+    studio_is_debut: bool
