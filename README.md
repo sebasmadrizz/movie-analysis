@@ -223,10 +223,17 @@ Example request:
 Example response:
 ```json
 {
-  "predicted_revenue": 281279437.07
+  "predicted_revenue": 281279437.07,
+  "director_is_debut": false,
+  "cast_is_debut": false,
+  "studio_is_debut": false
 }
 ```
- 
+ The `is_debut` flags let a frontend distinguish a data-backed prediction
+from one relying on a global fallback average — useful when predicting
+for newly announced movies whose director, cast, or studio have no
+track record in the dataset yet.
+
 Returns `404` if `director_id`, any `cast_ids`, or `studio_id` do not
 exist in the database.
  
