@@ -9,7 +9,12 @@ class MockMLService:
     # Fake service that mimics MLService's interface without touching
     # the real model or the database.
     def predict_revenue(self, request):
-        return 281279437.07
+        return {
+            "predicted_revenue": 281279437.07,
+            "director_is_debut": False,
+            "cast_is_debut": False,
+            "studio_is_debut": False,
+        }
 
 
 # Override the real get_ml_service dependency with the mock for all tests
@@ -35,6 +40,9 @@ def test_predict_revenue():
     data = response.json()
     assert "predicted_revenue" in data
     assert data["predicted_revenue"] > 0
+    assert data["director_is_debut"] is False
+    assert data["cast_is_debut"] is False
+    assert data["studio_is_debut"] is False
 
 
 def test_predict_revenue_missing_field():

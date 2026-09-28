@@ -234,6 +234,4 @@ from one relying on a global fallback average — useful when predicting
 for newly announced movies whose director, cast, or studio have no
 track record in the dataset yet.
 
-Returns `404` if `director_id`, any `cast_ids`, or `studio_id` do not
-exist in the database.
- 
+Unknown directors, cast, or studios are treated as debuts: they receive the global average revenue plus an is_debut flag, mirroring how the model was trained.
