@@ -13,6 +13,7 @@ class MLService:
         director_metrics = self.repo.get_director_metrics(request.director_id, request.release_date)
         cast_metrics = self.repo.get_cast_metrics(request.cast_ids, request.release_date)
         studio_metrics = self.repo.get_studio_metrics(request.studio_id, request.release_date)
+        budget_vs_genre_historical_ratio = self.repo.get_genre_budget_ratio(request.genres, request.budget, request.release_date)
 
     
 
@@ -20,7 +21,7 @@ class MLService:
             "budget_log": np.log1p(request.budget),
             "runtime": request.runtime,
             "budget_per_minute": request.budget / request.runtime,
-            "budget_vs_genre_historical_ratio": request.budget_vs_genre_historical_ratio,
+            "budget_vs_genre_historical_ratio": budget_vs_genre_historical_ratio,
             "release_year": request.release_date.year,
             "release_month": request.release_date.month,
             "release_day_of_week": request.release_date.weekday(),

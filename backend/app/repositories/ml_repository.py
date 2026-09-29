@@ -41,3 +41,10 @@ class MLRepository:
             {"company_id": company_id},
         )
         return result.first() is not None
+
+    def get_genre_budget_ratio(self, genres: list[str], budget: float, target_date: date) -> float:
+        result = self.db.execute(
+            text("SELECT get_genre_budget_ratio(:genres, :budget, :target_date)"),
+            {"genres": genres, "budget": budget, "target_date": target_date},
+        )
+        return float(result.scalar())

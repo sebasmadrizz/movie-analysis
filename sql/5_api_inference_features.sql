@@ -60,3 +60,30 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
+CREATE OR REPLACE FUNCTION get_genre_budget_ratio(target_genres TEXT[], target_budget NUMERIC, target_date DATE)
+RETURNS NUMERIC AS $$
+DECLARE
+    baseline NUMERIC;
+BEGIN
+    -- Average past budget per genre, then averaged across the movie's genres
+    SELECT AVG(genre_avg) INTO baseline
+    FROM (
+        SELECT AVG(m.budget) AS genre_avg
+        FROM dim_genres g
+        JOIN movie_genres mg ON g.genre_id = mg.genre_id
+        JOIN dim_movies m ON mg.movie_id = m.movie_id
+        WHERE g.genre_name = ANY(target_genres)
+          AND m.budget > 10000
+          AND m.release_date < target_date
+        GROUP BY g.genre_id
+    ) t;
+
+    -- Fallback to the global average budget, same as the feature store
+    IF baseline IS NULL THEN
+        SELECT AVG(budget) INTO baseline FROM dim_movies WHERE budget > 10000;
+    END IF;
+
+    RETURN ROUND((target_budget / baseline)::NUMERIC, 4);
+END;
+$$ LANGUAGE plpgsql;

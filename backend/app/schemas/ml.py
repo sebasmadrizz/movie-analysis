@@ -11,7 +11,6 @@ class RevenuePredictionRequest(BaseModel):
     studio_id: int
     is_sequel: int
     original_language_code: str
-    budget_vs_genre_historical_ratio: float
 
 class RevenuePredictionResponse(BaseModel):
     predicted_revenue: float

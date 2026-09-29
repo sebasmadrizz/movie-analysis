@@ -32,8 +32,7 @@ def test_predict_revenue():
         "cast_ids": [380, 62, 2231],
         "studio_id": 6194,
         "is_sequel": 0,
-        "original_language_code": "en",
-        "budget_vs_genre_historical_ratio": 1.2
+        "original_language_code": "en"
     }
     response = client.post("/api/v1/ml/predict-revenue", json=payload)
     assert response.status_code == 200
