@@ -57,6 +57,7 @@ repository) designed around SOLID principles, particularly
 Dependency Inversion — every layer depends on an abstraction it
 receives via FastAPI's `Depends()`, not on a concrete implementation
 it creates itself.
+```
 Request
   │
   ▼
@@ -70,6 +71,7 @@ Repository (repositories/*.py) — the only layer that knows SQL exists
   │
   ▼
 PostgreSQL
+```
 markdown
 This separation means:
 - **BI endpoints** are thin: each one queries a pre-aggregated SQL
@@ -79,9 +81,10 @@ This separation means:
   studio track record) by calling PostgreSQL functions that mirror
   the same leakage-safe window function pattern used at training
   time — reused for live inference.
-- Invalid input (e.g. a `director_id` that doesn't exist) is
-  rejected with a `404` before any prediction is attempted, instead
-  of silently defaulting to "debut" behavior.
+- Directors, cast, or studios with no track record in the dataset
+  (including IDs the dataset has never seen) fall back to the global
+  average revenue and a corresponding `is_debut` flag, matching the
+  cold-start handling used when the model was trained.
 
 The design leans on Dependency Inversion and Single Responsibility
 in particular — every layer receives its dependencies through
@@ -215,8 +218,7 @@ Example request:
   "cast_ids": [380, 62, 2231],
   "studio_id": 6194,
   "is_sequel": 0,
-  "original_language_code": "en",
-  "budget_vs_genre_historical_ratio": 1.2
+  "original_language_code": "en"
 }
 ```
  
@@ -233,5 +235,3 @@ Example response:
 from one relying on a global fallback average — useful when predicting
 for newly announced movies whose director, cast, or studio have no
 track record in the dataset yet.
-
-Unknown directors, cast, or studios are treated as debuts: they receive the global average revenue plus an is_debut flag, mirroring how the model was trained.
