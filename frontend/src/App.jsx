@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import BiDashboard from './pages/BiDashboard';
+import MoviePredictor from './pages/MoviePredictor';
 
 function Overview() {
   return (
@@ -14,9 +15,6 @@ function Overview() {
   );
 }
 
-function Predictor() {
-  return <h1 className="text-2xl font-bold">Machine Learning Revenue Predictor</h1>;
-}
 
 export default function App() {
   return (
@@ -25,7 +23,7 @@ export default function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Overview />} />
           <Route path="bi" element={<BiDashboard />} />
-          <Route path="predict" element={<Predictor />} />
+          <Route path="predict" element={<MoviePredictor />} />
         </Route>
       </Routes>
     </BrowserRouter>
