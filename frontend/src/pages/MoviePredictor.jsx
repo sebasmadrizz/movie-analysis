@@ -1,20 +1,66 @@
 import { useState, useEffect } from 'react';
-import { getUpcomingMovies, getPosterUrl } from '../api/tmdbClient';
+import {
+  getUpcomingMovies,
+  getMovieDetails,
+  getPosterUrl,
+  mapTmdbMovieToPredictionRequest,
+} from '../api/tmdbClient';
+import { predictRevenue } from '../api/client';
+import PredictionModal from '../components/PredictionModal';
  
 export default function MoviePredictor() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
  
+  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [requestData, setRequestData] = useState(null);
+  const [prediction, setPrediction] = useState(null);
+  const [panelLoading, setPanelLoading] = useState(false);
+  const [panelError, setPanelError] = useState(null);
+  const [credits, setCredits] = useState(null);
+ 
   useEffect(() => {
-  getUpcomingMovies()
-    .then((results) => {
-      console.log('Movies received:', results);
-      setMovies(results);
-    })
-    .catch((err) => setError(err.message))
-    .finally(() => setLoading(false));
-}, []);
+    getUpcomingMovies()
+      .then((results) => setMovies(results))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+ 
+  const handleSelectMovie = async (movie) => {
+    setSelectedMovie(movie);
+    setPanelLoading(true);
+    setPanelError(null);
+    setRequestData(null);
+    setPrediction(null);
+    setCredits(null);
+ 
+    try {
+      const details = await getMovieDetails(movie.id);
+      const request = mapTmdbMovieToPredictionRequest(details);
+      setRequestData(request);
+ 
+      const director = details.credits.crew.find((p) => p.job === 'Director');
+      const topCast = [...details.credits.cast].sort((a, b) => a.order - b.order).slice(0, 3);
+      const studio = details.production_companies[0];
+      setCredits({
+        directorName: director?.name ?? 'Unknown',
+        castNames: topCast.map((c) => c.name),
+        studioName: studio?.name ?? 'Unknown',
+      });
+ 
+      const result = await predictRevenue(request);
+      setPrediction(result);
+    } catch (err) {
+      setPanelError(err.message);
+    } finally {
+      setPanelLoading(false);
+    }
+  };
+ 
+  const handleCloseModal = () => {
+    setSelectedMovie(null);
+  };
  
   return (
     <div className="space-y-6">
@@ -48,6 +94,7 @@ export default function MoviePredictor() {
             return (
               <button
                 key={movie.id}
+                onClick={() => handleSelectMovie(movie)}
                 className="group text-left bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-md hover:border-slate-300 transition-all"
               >
                 <div className="aspect-[2/3] bg-slate-100">
@@ -74,6 +121,17 @@ export default function MoviePredictor() {
           })}
         </div>
       )}
+ 
+      <PredictionModal
+        movie={selectedMovie}
+        posterUrl={selectedMovie ? getPosterUrl(selectedMovie.poster_path) : null}
+        requestData={requestData}
+        credits={credits}
+        prediction={prediction}
+        loading={panelLoading}
+        error={panelError}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }

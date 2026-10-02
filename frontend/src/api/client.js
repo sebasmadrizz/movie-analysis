@@ -38,3 +38,10 @@ export async function apiClient(endpoint, options = {}) {
     throw error;
   }
 }
+
+export async function predictRevenue(request) {
+  return apiClient('/ml/predict-revenue', {
+    method: 'POST',
+    body: request,
+  });
+}

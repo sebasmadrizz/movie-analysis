@@ -32,3 +32,22 @@ export function getPosterUrl(posterPath, size = 'w342') {
   return `https://image.tmdb.org/t/p/${size}${posterPath}`;
 }
  
+export function mapTmdbMovieToPredictionRequest(movieDetails) {
+  const director = movieDetails.credits.crew.find((person) => person.job === 'Director');
+  const topCast = [...movieDetails.credits.cast]
+    .sort((a, b) => a.order - b.order)
+    .slice(0, 3);
+  const studio = movieDetails.production_companies[0];
+
+  return {
+    budget: movieDetails.budget,
+    runtime: movieDetails.runtime,
+    genres: movieDetails.genres.map((g) => g.name),
+    release_date: movieDetails.release_date,
+    director_id: director ? director.id : null,
+    cast_ids: topCast.map((c) => c.id),
+    studio_id: studio ? studio.id : null,
+    is_sequel: 0,
+    original_language_code: movieDetails.original_language,
+  };
+}
