@@ -97,7 +97,7 @@ export default function MoviePredictor() {
                 onClick={() => handleSelectMovie(movie)}
                 className="group text-left bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-md hover:border-slate-300 transition-all"
               >
-                <div className="aspect-[2/3] bg-slate-100">
+                <div className="aspect-[2/3] bg-slate-100 relative">
                   {posterUrl ? (
                     <img
                       src={posterUrl}
@@ -109,6 +109,11 @@ export default function MoviePredictor() {
                       No poster available
                     </div>
                   )}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                    <span className="text-white text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
+                      Predict Revenue →
+                    </span>
+                  </div>
                 </div>
                 <div className="p-3">
                   <p className="text-sm font-semibold text-slate-900 line-clamp-2">
