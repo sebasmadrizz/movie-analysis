@@ -94,6 +94,31 @@ unevenly for now (e.g. `MLRepository` doesn't yet share a common
 interface with `BIRepository`) — a known area for improvement as
 the project evolves.
 
+
+## Model Performance
+ 
+The revenue prediction model (HistGradientBoostingRegressor, tuned
+via RandomizedSearchCV) is trained on 3,498 movies from the feature
+store, predicting revenue in log-space to handle the heavy skew in
+box office numbers.
+ 
+| Metric | Value |
+|---|---|
+| R² (cross-validated) | 0.54 |
+| R² (test set) | 0.50 |
+| MAE (log scale) | 0.87 |
+| RMSE (log scale) | 1.23 |
+ 
+An R² around 0.50 means the model explains roughly half the variance
+in log-revenue — a reasonable result given how noisy box office
+outcomes are, and a large part of why this project leans so heavily
+on SQL-based feature engineering (director/cast/studio track record,
+genre-relative budget normalization) rather than throwing raw
+numbers at the model. These numbers are a baseline, not a final
+result — model tuning and additional features are an active area of
+improvement as the project evolves.
+
+ 
 ## How to Run It
 
 ### Prerequisites
