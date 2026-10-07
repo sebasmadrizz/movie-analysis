@@ -37,23 +37,35 @@ function getValueColor(key, val) {
 }
  
 export default function DataTable({ data, sortKey, sortDirection, setSortKey, setSortDirection }) {
-const sortedData = sortKey
-  ? [...data].sort((a, b) => {
-      const valA = a[sortKey];
-      const valB = b[sortKey];
-      if (valA === valB) return 0;
-      const comparison = valA > valB ? 1 : -1;
-      return sortDirection === 'asc' ? comparison : -comparison;
-    })
-  : data;
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const sortedData = sortKey
+    ? [...data].sort((a, b) => {
+        const valA = a[sortKey];
+        const valB = b[sortKey];
+        if (valA === valB) return 0;
+        const comparison = valA > valB ? 1 : -1;
+        return sortDirection === 'asc' ? comparison : -comparison;
+      })
+    : data;
+
+    const filteredData = searchQuery
+  ? sortedData.filter((row) =>
+      Object.values(row).some((val) =>
+        String(val).toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    )
+  : sortedData;
+
   const handleSort = (key) => {
-  if (sortKey === key) {
-    setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-  } else {
-    setSortKey(key);
-    setSortDirection('asc');
-  }
-};
+    if (sortKey === key) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDirection('asc');
+    }
+  };
+
   if (!data || data.length === 0) {
     return (
       <div className="p-8 text-center text-gray-500 text-sm">
@@ -62,41 +74,51 @@ const sortedData = sortKey
     );
   }
 
-
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-left text-sm text-gray-600">
-        <thead className="bg-slate-100 text-slate-700 uppercase text-xs tracking-wider">
-          <tr>
-            {Object.keys(data[0]).map((key) => (
-              <th
-                key={key}
-                onClick={() => handleSort(key)}
-                className="px-6 py-3 font-semibold cursor-pointer select-none hover:text-slate-900"
-              >
-                {key.replace(/_/g, ' ')}
-                {sortKey === key && (sortDirection === 'asc' ? ' ▲' : ' ▼')}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200">
-          {sortedData.map((row, index) => (
-            <tr key={index} className="hover:bg-gray-50/80 transition-colors">
-              {Object.entries(row).map(([key, val]) => (
-                <td
+    <div>
+      <div className="px-6 py-3 border-b border-gray-200">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search..."
+          className="w-full max-w-xs border border-gray-300 rounded-md text-sm px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-slate-900"
+        />
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-sm text-gray-600">
+          <thead className="bg-slate-100 text-slate-700 uppercase text-xs tracking-wider">
+            <tr>
+              {Object.keys(data[0]).map((key) => (
+                <th
                   key={key}
-                  className={`px-6 py-4 whitespace-nowrap font-medium ${
-                    getValueColor(key, val) || 'text-slate-800'
-                  }`}
+                  onClick={() => handleSort(key)}
+                  className="px-6 py-3 font-semibold cursor-pointer select-none hover:text-slate-900"
                 >
-                  {formatValue(key, val)}
-                </td>
+                  {key.replace(/_/g, ' ')}
+                  {sortKey === key && (sortDirection === 'asc' ? ' ▲' : ' ▼')}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {filteredData.map((row, index) => (
+              <tr key={index} className="hover:bg-gray-50/80 transition-colors">
+                {Object.entries(row).map(([key, val]) => (
+                  <td
+                    key={key}
+                    className={`px-6 py-4 whitespace-nowrap font-medium ${
+                      getValueColor(key, val) || 'text-slate-800'
+                    }`}
+                  >
+                    {formatValue(key, val)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
