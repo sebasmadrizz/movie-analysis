@@ -47,7 +47,7 @@ export function mapTmdbMovieToPredictionRequest(movieDetails) {
     director_id: director ? director.id : null,
     cast_ids: topCast.map((c) => c.id),
     studio_id: studio ? studio.id : null,
-    is_sequel: 0,
+    is_sequel: movieDetails.belongs_to_collection ? 1 : 0,
     original_language_code: movieDetails.original_language,
   };
 }
