@@ -4,29 +4,31 @@ import {
   getMovieDetails,
   getPosterUrl,
   mapTmdbMovieToPredictionRequest,
+  validatePredictionRequest,
 } from '../api/tmdbClient';
 import { predictRevenue } from '../api/client';
 import PredictionModal from '../components/PredictionModal';
- 
+
 export default function MoviePredictor() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
- 
+
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [requestData, setRequestData] = useState(null);
   const [prediction, setPrediction] = useState(null);
   const [panelLoading, setPanelLoading] = useState(false);
   const [panelError, setPanelError] = useState(null);
   const [credits, setCredits] = useState(null);
- 
+  const [missingFields, setMissingFields] = useState(null);
+
   useEffect(() => {
     getUpcomingMovies()
       .then((results) => setMovies(results))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);
- 
+
   const handleSelectMovie = async (movie) => {
     setSelectedMovie(movie);
     setPanelLoading(true);
@@ -34,12 +36,18 @@ export default function MoviePredictor() {
     setRequestData(null);
     setPrediction(null);
     setCredits(null);
- 
+    setMissingFields(null);
+
     try {
       const details = await getMovieDetails(movie.id);
       const request = mapTmdbMovieToPredictionRequest(details);
+      const missing = validatePredictionRequest(request);
+      if (missing) {
+        setMissingFields(missing);
+        return;
+      }
       setRequestData(request);
- 
+
       const director = details.credits.crew.find((p) => p.job === 'Director');
       const topCast = [...details.credits.cast].sort((a, b) => a.order - b.order).slice(0, 3);
       const studio = details.production_companies[0];
@@ -48,7 +56,7 @@ export default function MoviePredictor() {
         castNames: topCast.map((c) => c.name),
         studioName: studio?.name ?? 'Unknown',
       });
- 
+
       const result = await predictRevenue(request);
       setPrediction(result);
     } catch (err) {
@@ -57,11 +65,11 @@ export default function MoviePredictor() {
       setPanelLoading(false);
     }
   };
- 
+
   const handleCloseModal = () => {
     setSelectedMovie(null);
   };
- 
+
   return (
     <div className="space-y-6">
       <div className="border-b border-gray-200 pb-5">
@@ -72,21 +80,21 @@ export default function MoviePredictor() {
           Pick an upcoming movie to predict its box office revenue using our model.
         </p>
       </div>
- 
+
       {error && (
         <div className="p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded shadow-sm">
           <p className="font-semibold text-sm">TMDB Connection Error</p>
           <p className="text-xs mt-1">{error}</p>
         </div>
       )}
- 
+
       {loading && !error && (
         <div className="flex flex-col items-center justify-center py-16 text-gray-500">
           <div className="w-8 h-8 border-4 border-slate-300 border-t-slate-800 rounded-full animate-spin mb-3"></div>
           <p className="text-sm font-medium">Fetching upcoming movies...</p>
         </div>
       )}
- 
+
       {!loading && !error && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {movies.map((movie) => {
@@ -126,7 +134,7 @@ export default function MoviePredictor() {
           })}
         </div>
       )}
- 
+
       <PredictionModal
         movie={selectedMovie}
         posterUrl={selectedMovie ? getPosterUrl(selectedMovie.poster_path) : null}
@@ -136,6 +144,7 @@ export default function MoviePredictor() {
         loading={panelLoading}
         error={panelError}
         onClose={handleCloseModal}
+        missingFields={missingFields}
       />
     </div>
   );

@@ -1,9 +1,9 @@
 from datetime import date
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 class RevenuePredictionRequest(BaseModel):
-    budget: float
-    runtime: float
+    budget: float = Field(gt=0)
+    runtime: float = Field(gt=0)
     genres: list[str]
     release_date: date
     director_id: int

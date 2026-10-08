@@ -54,3 +54,19 @@ def test_predict_revenue_missing_field():
     }
     response = client.post("/api/v1/ml/predict-revenue", json=payload)
     assert response.status_code == 422
+
+def test_predict_revenue_rejects_zero_budget():
+    # Budget must be > 0 — schema validation should reject it before the service runs
+    payload = {
+        "budget": 0,
+        "runtime": 120,
+        "genres": ["Action"],
+        "release_date": "2024-06-15",
+        "director_id": 488,
+        "cast_ids": [380, 62, 2231],
+        "studio_id": 6194,
+        "is_sequel": 0,
+        "original_language_code": "en",
+    }
+    response = client.post("/api/v1/ml/predict-revenue", json=payload)
+    assert response.status_code == 422

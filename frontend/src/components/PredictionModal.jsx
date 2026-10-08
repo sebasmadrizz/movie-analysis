@@ -11,7 +11,7 @@ function DebutBadge({ isDebut, label }) {
 }
  
 function formatCurrency(val) {
-  if (!val && val !== 0) return '—';
+  if (!val) return '—';
   return val.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 }
  
@@ -23,6 +23,7 @@ export default function PredictionModal({
   prediction,
   loading,
   error,
+  missingFields,
   onClose,
 }) {
   if (!movie) return null;
@@ -68,6 +69,26 @@ export default function PredictionModal({
           )}
  
           {error && <p className="text-sm text-red-600">Error: {error}</p>}
+ 
+          {missingFields && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm">
+              <p className="font-semibold text-amber-800">Not enough data to predict yet</p>
+              <p className="mt-1 text-amber-700">
+  TMDB hasn&apos;t published some details for this movie, which is common for
+  recent or upcoming titles. The model needs these to make a prediction:
+</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {missingFields.map((field) => (
+                  <span
+                    key={field}
+                    className="px-2 py-0.5 rounded bg-amber-100 text-amber-800 text-xs font-medium capitalize"
+                  >
+                    {field}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
  
           {requestData && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
@@ -125,3 +146,4 @@ export default function PredictionModal({
     </div>
   );
 }
+ 

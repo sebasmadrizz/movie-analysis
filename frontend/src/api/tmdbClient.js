@@ -51,3 +51,15 @@ export function mapTmdbMovieToPredictionRequest(movieDetails) {
     original_language_code: movieDetails.original_language,
   };
 }
+
+export function validatePredictionRequest(request) {
+  const missing = [];
+
+  if (!request.budget || request.budget <= 0) missing.push('budget');
+  if (!request.runtime || request.runtime <= 0) missing.push('runtime');
+  if (!request.director_id) missing.push('director');
+  if (!request.cast_ids || request.cast_ids.length === 0) missing.push('cast');
+  if (!request.studio_id) missing.push('studio');
+
+  return missing.length > 0 ? missing : null;
+}
