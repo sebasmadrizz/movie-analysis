@@ -2,6 +2,7 @@ from unittest.mock import MagicMock
 from fastapi.testclient import TestClient
 from app.main import app
 from app.api.deps import get_bi_service
+import pytest
 
 client = TestClient(app)
 
@@ -127,3 +128,14 @@ def test_top_lead_actors():
     data = response.json()
     assert isinstance(data, list)
     assert data[0]["actor_name"] == "Tom Cruise"
+
+
+@pytest.mark.parametrize("bad_limit", [0, -5, 101, 1000000])
+def test_limit_out_of_range_is_rejected(bad_limit):
+    response = client.get(f"/api/v1/bi/top-profitable-movies?limit={bad_limit}")
+    assert response.status_code == 422
+
+
+def test_limit_at_upper_bound_is_accepted():
+    response = client.get("/api/v1/bi/top-profitable-movies?limit=100")
+    assert response.status_code == 200

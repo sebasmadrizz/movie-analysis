@@ -203,7 +203,7 @@ running. Below is a summary.
 ### BI Endpoints (`/api/v1/bi`)
  
 All BI endpoints are `GET` requests that query a pre-aggregated SQL
-view, with an optional `limit` query parameter (default: 10).
+with an optional `limit` query parameter (1–100, default: 10).
  
 | Endpoint | Returns |
 |---|---|
