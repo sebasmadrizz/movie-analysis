@@ -24,7 +24,7 @@ export async function getUpcomingMovies(page = 1) {
   return data.results.filter((movie) => movie.release_date >= cutoffStr);
 }
 export async function getMovieDetails(movieId) {
-  return tmdbFetch(`/movie/${movieId}?append_to_response=credits&language=en-US`);
+  return tmdbFetch(`/movie/${movieId}?append_to_response=credits,keywords&language=en-US`);
 }
 
 export function getPosterUrl(posterPath, size = 'w342') {
@@ -47,7 +47,7 @@ export function mapTmdbMovieToPredictionRequest(movieDetails) {
     director_id: director ? director.id : null,
     cast_ids: topCast.map((c) => c.id),
     studio_id: studio ? studio.id : null,
-    is_sequel: movieDetails.belongs_to_collection ? 1 : 0,
+    is_sequel: movieDetails.keywords?.keywords?.some((k) => k.name === 'sequel') ? 1 : 0,
     original_language_code: movieDetails.original_language,
   };
 }
