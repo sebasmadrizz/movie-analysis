@@ -24,7 +24,7 @@ class MLService:
             "budget_vs_genre_historical_ratio": budget_vs_genre_historical_ratio,
             "release_year": request.release_date.year,
             "release_month": request.release_date.month,
-            "release_day_of_week": request.release_date.weekday(),
+            "release_day_of_week": request.release_date.isoweekday(),
             "genre_count": len(request.genres),
             "director_prior_movies_count": director_metrics["director_prior_movies_count"],
             "director_historical_avg_revenue": float(director_metrics["director_historical_avg_revenue"]),
