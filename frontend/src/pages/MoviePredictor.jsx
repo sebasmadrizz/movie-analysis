@@ -50,7 +50,7 @@ export default function MoviePredictor() {
 
       const director = details.credits.crew.find((p) => p.job === 'Director');
       const topCast = [...details.credits.cast].sort((a, b) => a.order - b.order).slice(0, 3);
-      const studio = details.production_companies[0];
+      const studio = [...details.production_companies].sort((a, b) => a.id - b.id)[0];
       setCredits({
         directorName: director?.name ?? 'Unknown',
         castNames: topCast.map((c) => c.name),

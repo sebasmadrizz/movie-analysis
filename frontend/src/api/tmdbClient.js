@@ -37,7 +37,7 @@ export function mapTmdbMovieToPredictionRequest(movieDetails) {
   const topCast = [...movieDetails.credits.cast]
     .sort((a, b) => a.order - b.order)
     .slice(0, 3);
-  const studio = movieDetails.production_companies[0];
+  const studio = [...movieDetails.production_companies].sort((a, b) => a.id - b.id)[0];
 
   return {
     budget: movieDetails.budget,
