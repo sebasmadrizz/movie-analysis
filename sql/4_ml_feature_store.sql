@@ -6,9 +6,10 @@ WITH global_avg_revenue AS (
 global_avg_budget AS (
     SELECT AVG(budget) AS avg_bud FROM dim_movies WHERE budget > 10000
 ),
-director_metrics AS (
+director_metrics_all AS (
     SELECT 
         mc.movie_id,
+        p.person_id,
         p.name AS director_name,
         AVG(m_past.revenue) OVER (
             PARTITION BY p.person_id 
@@ -24,6 +25,15 @@ director_metrics AS (
     JOIN dim_people p ON mc.person_id = p.person_id
     JOIN dim_movies m_past ON mc.movie_id = m_past.movie_id
     WHERE mc.job = 'Director' AND m_past.revenue > 0
+),
+director_metrics AS (
+    SELECT DISTINCT ON (movie_id)
+        movie_id,
+        director_name,
+        director_historical_avg_revenue,
+        director_prior_movies_count
+    FROM director_metrics_all
+    ORDER BY movie_id, person_id
 ),
 top3_cast_metrics AS (
     SELECT 
