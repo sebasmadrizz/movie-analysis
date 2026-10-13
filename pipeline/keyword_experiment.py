@@ -41,7 +41,8 @@ base_features = [
 ] + list(genre_dummies.columns) + list(lang_dummies.columns)
 
 # 'sequel' is already captured by is_sequel
-kw = kw[(kw["keyword_name"] != "sequel") & kw["movie_id"].isin(df["movie_id"])]
+EXCLUDE = {"sequel", "duringcreditsstinger", "aftercreditsstinger"}
+kw = kw[~kw["keyword_name"].isin(EXCLUDE) & kw["movie_id"].isin(df["movie_id"])]
 counts = kw["keyword_name"].value_counts()
 
 
