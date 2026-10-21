@@ -33,7 +33,9 @@ export function getPosterUrl(posterPath, size = 'w342') {
 }
  
 export function mapTmdbMovieToPredictionRequest(movieDetails) {
-  const director = movieDetails.credits.crew.find((person) => person.job === 'Director');
+  const director = movieDetails.credits.crew
+  .filter((person) => person.job === 'Director')
+  .sort((a, b) => a.id - b.id)[0];
   const topCast = [...movieDetails.credits.cast]
     .sort((a, b) => a.order - b.order)
     .slice(0, 3);
