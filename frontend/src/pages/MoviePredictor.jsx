@@ -48,7 +48,9 @@ export default function MoviePredictor() {
       }
       setRequestData(request);
 
-      const director = details.credits.crew.find((p) => p.job === 'Director');
+      const director = details.credits.crew
+  .filter((p) => p.job === 'Director')
+  .sort((a, b) => a.id - b.id)[0];
       const topCast = [...details.credits.cast].sort((a, b) => a.order - b.order).slice(0, 3);
       const studio = [...details.production_companies].sort((a, b) => a.id - b.id)[0];
       setCredits({
